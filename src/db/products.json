@@ -1,0 +1,54 @@
+[
+  {
+    "id": "7607e29f-91f0-4474-887e-88602b1ec616",
+    "title": "Titulo 1",
+    "description": "Description 1",
+    "code": "code 1",
+    "price": 50,
+    "status": false,
+    "stock": 5,
+    "category": "categoria 1",
+    "thumbnails": [
+      "www.array1.com.ar"
+    ]
+  },
+  {
+    "id": "0211c15b-65f2-43c9-8fba-41e7fd8430e9",
+    "title": "Titulo 2",
+    "description": "Description 2",
+    "code": "code 2",
+    "price": 400,
+    "status": true,
+    "stock": 25,
+    "category": "categoria 2",
+    "thumbnails": []
+  },
+  {
+    "id": "1491dfd4-da55-487d-9e05-1a0b0f0f2f3b",
+    "title": "Titulo 3",
+    "description": "Description 3",
+    "code": "code 3",
+    "price": 1500,
+    "status": true,
+    "stock": 80,
+    "category": "categoria 3",
+    "thumbnails": [
+      "www.prueba3.com.ar",
+      "www.pruebaArray.com.ar"
+    ]
+  },
+  {
+    "id": "72fce8bf-c66d-45f1-bc19-db60254ca362",
+    "title": "Titulo 4",
+    "description": "Description 4",
+    "code": "code 4",
+    "price": 4350,
+    "status": false,
+    "stock": 150,
+    "category": "categoria 4",
+    "thumbnails": [
+      "www.prueba4.com.ar",
+      "www.pruebaArray2.com.ar"
+    ]
+  }
+]
