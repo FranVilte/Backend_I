@@ -1,0 +1,35 @@
+<h1>
+    Home Page
+</h1>
+
+<ul class="collection">    
+        <table class="striped">
+        <thead>
+            <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Precio</th>
+            </tr>
+        </thead>        
+        <tbody id="product-table-body">
+            {{#each products}}
+            <tr>
+                <td>
+                    <strong>{{this.id}}</strong>  
+                </td>
+                <td>
+                    <strong>{{this.title}}</strong>  
+                </td>
+                <td>
+                    <strong>{{this.price}}</strong>  
+                </td>
+            </tr>         
+            {{/each}}
+        </tbody>        
+        </table>
+        {{!-- <li class="collection-item">
+            <strong>{{this.title}}</strong>   
+            -
+            <strong>{{this.price}}</strong>   
+        </li> --}}    
+</ul>

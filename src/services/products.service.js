@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import {v4 as uuid} from "uuid";
+import { io } from "../server.js";
 
 /**
  * @param { path } path - Path del archivo donde se guardan los productos
@@ -70,9 +71,10 @@ class ProductService {
             thumbnails
         }
 
-        this.products.push(product)
+        this.products.push(product)        
 
         try {
+            io.emit("new-product", product);
             await this.saveOnFile();   
 
             return product;
@@ -115,7 +117,7 @@ class ProductService {
         this.products[index] = product;
 
         try {
-            
+            io.emit("new-product", product);
             await this.saveOnFile();
             return product;    
 
@@ -136,9 +138,10 @@ class ProductService {
 
         this.products.splice(index, 1);
 
-        try {
-            
+        try {           
             await this.saveOnFile();
+
+            io.emit("new-product", product);
             
             return product;    
 
