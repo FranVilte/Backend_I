@@ -28,6 +28,23 @@ cartRouter.post("/", async (req, res) => {
     }
 });
 
+cartRouter.post("/:cid/products/:pid", async (req, res) => {
+
+    const {cid, pid} = req.params;
+
+    try {
+
+        const cart = await cartService.insertProduct(cid, pid);
+
+        res.status(201).json(cart);
+
+    } catch (error) {
+
+        console.error("Error al crear el carrito");
+    }
+});
+
+/*
 cartRouter.put("/:id", async (req, res) => {
 
     const {id} = req.params;
@@ -47,6 +64,71 @@ cartRouter.put("/:id", async (req, res) => {
         res.status(200).json(cart)
 
     } catch (error) {        
+        
+        console.error("Error de Servidor");
+        
+    }
+
+});
+*/
+cartRouter.put("/:cid/products/:pid", async (req, res) => {
+
+    const {cid, pid} = req.params;
+
+    const quantity = req.body;
+
+    try {                
+
+        const cart = await cartService.update(cid, pid, quantity);
+
+        if(!cart) return res.status(404).json({ message: "El carrito no se encuentra" });
+
+        res.status(200).json(cart)
+
+    } catch (error) {        
+        
+        console.error("Error de Servidor");
+        
+    }
+
+});
+
+
+cartRouter.delete("/:cid/products/:pid", async (req, res) => {
+
+    const {cid, pid} = req.params;
+
+    try {                
+
+        const cart = await cartService.deleteProductById(cid, pid);
+
+        if(!cart) return res.status(404).json({ message: "El carrito no se encuentra" });
+
+        res.status(200).json(cart)
+
+    } catch (error) {        
+        console.log(error);
+        
+        console.error("Error de Servidor");
+        
+    }
+
+});
+
+cartRouter.delete("/:cid", async (req, res) => {
+
+    const {cid} = req.params;
+
+    try {                
+
+        const cart = await cartService.deleteProducts(cid);
+
+        if(!cart) return res.status(404).json({ message: "El carrito no se encuentra" });
+
+        res.status(200).json(cart)
+
+    } catch (error) {        
+        console.log(error);
         
         console.error("Error de Servidor");
         

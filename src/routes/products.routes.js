@@ -4,9 +4,9 @@ import { productService } from "../services/products.service.js";
 export const productRouter = Router();
 
 productRouter.get("/", async (req, res) => {
-    
-    const products = await productService.getAll() 
 
+    const products = await productService.getAll()
+    
     res.status(200).json(products);
 });
 

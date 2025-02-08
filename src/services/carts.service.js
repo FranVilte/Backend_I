@@ -1,10 +1,29 @@
 import { log } from "node:console";
 import fs from "node:fs";
 import {v4 as uuid} from "uuid";
+import { cartModel } from "../models/cart.model.js"; 
+import mongoose from "mongoose";
 
 class CartsService{
 
-    path;
+    constructor(page = 1, limit = 5) {
+        this.carts = [];
+        this.getPaginatedCarts(page, limit);
+    }
+    
+        async getPaginatedCarts(page = 1, limit = 5) {
+        try {
+            const result = await cartModel.paginate({}, { page, limit });
+        
+            this.docs = result;
+            this.carts = result.docs;
+    
+        } catch (error) {
+            console.error('Error al obtener los carritos paginados:', error);
+            }
+        }
+
+    /*path;
     carts = [];
 
     constructor(path){
@@ -22,27 +41,44 @@ class CartsService{
             this.carts = [];
         }
 
+    }*/
+
+    async getAll(page = 1, limit = 5){
+    
+        await this.getPaginatedCarts(page, limit);
+        
+        return this.docs;
     }
 
     async getByID(id){
 
         const cart = this.carts.find((cart) => cart.id === id );
-        
-        return cart;
+
+        const cartPopulate = await cartModel.findById(cart.id)
+        .populate("products.product") 
+        .exec();
+        console.log('Carrito con productos poblados:', cartPopulate);
+
+        return cartPopulate;
     }
 
     async create(){
 
         const id = uuid(); 
 
-        const cart = { id, products: []}
+        const cart = { products: []}
 
         this.carts.push(cart);
 
         try {
-            await this.saveOnFile();
+            //await this.saveOnFile();
 
-            return cart;
+            const newCart = new cartModel(cart);
+            
+            const savedCart = await newCart.save();
+
+            return savedCart;
+
         } catch (error) {
             
             console.error("Error al crear el carrito");
@@ -51,7 +87,35 @@ class CartsService{
 
     }
 
-    async update({id, products}){
+    async insertProduct(idCart, idProduct){
+
+        try {
+
+            const updatedCart = await cartModel.findOneAndUpdate(
+            {_id: idCart}, 
+            {
+                $push: { 
+                    products: { 
+                        product: new mongoose.Types.ObjectId(idProduct),
+                        quantity: 1 
+                    }
+                },
+            },
+            {
+                new: true  
+            });
+
+            return updatedCart;
+
+        } catch (error) {
+            
+            console.error("Error al crear el carrito");
+            
+        }
+
+    }
+
+    /*async update({id, products}){
         
         const cart = this.carts.find((cart) => cart.id === id);
 
@@ -79,6 +143,94 @@ class CartsService{
             console.error("Error al agregar los productos");
         }
 
+    }*/
+
+    async update(idCart, idProduct, quantity){
+        const cart = this.carts.find((cart) => cart.id === idCart);
+        console.log(cart);
+        
+        if(!cart){
+            return null;
+        }
+
+        try {
+            
+            const quantityValue = quantity.quantity;
+
+            const updatedCart = await cartModel.findOneAndUpdate(
+                {_id: idCart,                            
+                "products.product": idProduct},  
+                {
+                $set: {
+                    "products.$.quantity": quantityValue
+                }
+                },
+                {
+                new: true  
+                }
+                
+              );
+
+            return updatedCart;    
+
+        } catch (error) {            
+            console.log(error);
+            
+            console.error("Error al eliminar el archivo");
+        }
+    }
+
+    async deleteProductById(idCart, idProduct){
+        const cart = this.carts.find((cart) => cart.id === idCart);
+        
+        if(!cart){
+            return null;
+        }
+
+        try {
+            const updatedCart = await cartModel.findByIdAndUpdate(
+                idCart, 
+                { 
+                  $pull: {                                         
+                    products: { 
+                        product: new mongoose.Types.ObjectId(idProduct)
+                    }
+                  }
+                },
+                { new: true }, 
+                
+              );
+
+            return updatedCart;    
+
+        } catch (error) {            
+            console.log(error);
+            
+            console.error("Error al eliminar el archivo");
+        }
+    }
+
+    async deleteProducts(idCart){
+        const cart = this.carts.find((cart) => cart.id === idCart);
+        
+        if(!cart){
+            return null;
+        }
+
+        try {
+
+            const updatedCart = await cartModel.updateOne(
+                { _id: idCart },
+                { $set: { products: [] } }
+              )
+
+            return updatedCart;    
+
+        } catch (error) {            
+            console.log(error);
+            
+            console.error("Error al eliminar el archivo");
+        }
     }
 
     async saveOnFile(){

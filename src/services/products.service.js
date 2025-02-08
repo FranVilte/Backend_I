@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import {v4 as uuid} from "uuid";
 import { io } from "../server.js";
+import { productModel } from "../models/product.model.js";
+
+const mongoURI = "mongodb+srv://francovilte:a5fDKqz0dzjKEqB6@cluster0.8q454.mongodb.net/"
 
 /**
  * @param { path } path - Path del archivo donde se guardan los productos
@@ -8,7 +11,25 @@ import { io } from "../server.js";
 
 class ProductService {
 
-    path;
+    constructor(page = 1, limit = 5) {
+        this.products = [];  
+        this.docs = {};
+        this.getPaginatedProducts(page, limit); 
+      }
+
+    async getPaginatedProducts(page = 1, limit = 5) {
+    try {
+        const result = await productModel.paginate({}, { page, limit });
+
+        this.docs = result;
+        this.products = result.docs; 
+
+    } catch (error) {
+        console.error('Error al obtener productos paginados:', error);
+        }
+    }
+
+    /*path;
     products = [];
 
     constructor(path) {
@@ -22,15 +43,18 @@ class ProductService {
             }
         } else {
             this.products = []
-        }
-    }
+        }         
+    }*/
 
     /**
      * 
      * @returns {Object} - Devuelve todos los productos
      */
-    async getAll(){
-        return this.products;
+    async getAll(page = 1, limit = 5){
+        
+        await this.getPaginatedProducts(page, limit);
+
+        return this.docs;
     }
 
     /**
@@ -38,7 +62,8 @@ class ProductService {
      * @param {id} - id del producto
      * @returns {Object} - Devuelve el producto seleccionado
      */
-    async getByID({ id }){
+    async getByID({ id }){;
+        
         const product = this.products.find((product) => product.id === id)
         
         return product;
@@ -54,13 +79,13 @@ class ProductService {
         category,
         thumbnails
     }){
-        const id = uuid();
+        //const id = uuid();
 
         price = Number(price);
         stock = Number(stock);
 
         const product = {
-            id,
+            //id,
             title,
             description,
             code,
@@ -69,15 +94,20 @@ class ProductService {
             stock,
             category,
             thumbnails
-        }
+        }       
 
-        this.products.push(product)        
+        //this.products.push(product)
 
         try {
-            io.emit("new-product", product);
-            await this.saveOnFile();   
+            //io.emit("new-product", product);
+            //await this.saveOnFile();                         
+            
+            const newProduct = new productModel(product);
 
-            return product;
+            const savedProduct = await newProduct.save();
+
+            return savedProduct;
+
         } catch (error) {
             console.error("Error al guardar el archivo")
         }        
@@ -112,14 +142,21 @@ class ProductService {
         product.category = category ??  product.category;
         product.thumbnails = thumbnails ??  product.thumbnails;
 
-        const index = this.products.findIndex((product) => product.id === id );
+        //const index = this.products.findIndex((product) => product.id === id );
 
-        this.products[index] = product;
+        //this.products[index] = product;
 
         try {
-            io.emit("new-product", product);
-            await this.saveOnFile();
-            return product;    
+            /*io.emit("new-product", product);
+            await this.saveOnFile();*/
+
+            const result = await productModel.findOneAndUpdate(
+                { _id: product.id },  
+                product,  
+                { new: true } 
+              );
+
+            return result;    
 
         } catch (error) {
             console.error("Error al eliminar el archivo");
@@ -134,19 +171,20 @@ class ProductService {
             return null;
         }
 
-        const index = this.products.findIndex((product) => product.id === id );
+        //const index = this.products.findIndex((product) => product.id === id );
 
-        this.products.splice(index, 1);
+        //this.products.splice(index, 1);
 
         try {           
-            await this.saveOnFile();
+            /*await this.saveOnFile();
 
-            io.emit("new-product", product);
-            
-            return product;    
+            io.emit("new-product", product);*/
 
-        } catch (error) {
+            const deletedProduct = await productModel.findOneAndDelete({ _id: product.id });
             
+            return deletedProduct;    
+
+        } catch (error) {            
             console.error("Error al eliminar el archivo");
         }
     }
@@ -167,4 +205,14 @@ class ProductService {
     path: "../BACKEND_I/src/db/products.json",
 }); */
 
-export const productService = new ProductService("../BACKEND_I/src/db/products.json")
+export const productService = new ProductService();
+/*
+const initialize = async () => {
+    console.log("inicializa");
+    
+    await productService.getProducts();       // Obtener los productos
+};
+
+initialize();
+*/
+//export const productService = new ProductService("../BACKEND_I/src/db/products.json")

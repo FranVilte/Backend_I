@@ -1,7 +1,9 @@
 import express from "express";
 import path from "path";
 import handlebars from "express-handlebars";
+import Handlebars from "handlebars";
 import morgan from "morgan";
+import mongoose from "mongoose";
 
 import { productRouter } from "./routes/products.routes.js";
 import { cartRouter } from "./routes/carts.routes.js";
@@ -11,6 +13,8 @@ import { Server } from "socket.io";
 import { productService } from "./services/products.service.js";
 
 import { __dirname } from "./dirname.js";
+
+import { allowInsecurePrototypeAccess } from "@handlebars/allow-prototype-access"
 
 
 const app = express();
@@ -26,6 +30,7 @@ app.engine(
     handlebars.engine({
         extname: ".hbs",
         defaultLayout: "main",
+        handlebars: allowInsecurePrototypeAccess(Handlebars),
     })
 )
 
@@ -35,6 +40,15 @@ app.set("views", path.resolve(__dirname, "./views"));
 app.use("/", viewRouter);
 app.use("/api/products", productRouter);
 app.use("/api/carts", cartRouter);
+
+mongoose
+    .connect("")
+    .then(() => {
+        console.log("Conectado con MongoDB");
+    }).catch((error) => {
+        console.log("Error en la conexion con MongoDB", error);
+        
+    })
 
 const server = app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
